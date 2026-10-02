@@ -1,6 +1,8 @@
 # 1. Force amd64 platform to prevent architecture/loader crashes on Mac M1/M2/M3 or ARM servers
 FROM --platform=linux/amd64 apify/actor-python:3.13
 
+USER root
+
 # 2. Install all core Linux graphics & rendering dependencies as root
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
