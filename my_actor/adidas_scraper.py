@@ -1,5 +1,5 @@
 from playwright.async_api import TimeoutError as ClearcoteTimeoutError, BrowserContext, Page, Browser
-from clearcote.async_api import launch_persistent_context, GeoipError
+# from clearcote.async_api import launch_persistent_context, GeoipError
 from chromiumfish.async_api import AsyncChromiumfish
 from playwright._impl._errors import TargetClosedError
 from datetime import datetime, timedelta, timezone
@@ -225,7 +225,7 @@ class AdidasScraper:
                 await self.http_client.wait_for_timeout(2000)
                 page_html = await self.http_client.inner_html("html")
                 self.adidas_store_build_id = page_html.split("/_buildManifest.js")[0].split("/")[-1]
-            except (ValueError, GeoipError, ClearcoteTimeoutError):
+            except (ValueError, ClearcoteTimeoutError):
                 Actor.log.error(f"❌ CONNECTION ATTEMPT {attempt}/5 FAILED DUE TO A BAD PROXY. RETRYING...")
                 if self.proxy_cfg:
                     while True:
@@ -292,7 +292,7 @@ class AdidasScraper:
                 await self.http_client.goto(cookie_url)          
                 await self.http_client.wait_for_selector('article[data-testid="plp-product-card"]')
                 await self.http_client.wait_for_timeout(2000)
-            except (ValueError, GeoipError, ClearcoteTimeoutError):
+            except (ValueError, ClearcoteTimeoutError):
                 Actor.log.error(f"❌ COOKIE REFRESH ATTEMPT {attempt}/5 FAILED DUE TO A BAD PROXY. RETRYING...")
                 if self.proxy_cfg:
                     while True:
