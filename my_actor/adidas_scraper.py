@@ -209,7 +209,7 @@ class AdidasScraper:
         new_build_id_obtained = False
         for attempt in range(1, 6):
             try:
-                self.browser: Browser = AsyncChromiumfish(
+                chromium_fish = AsyncChromiumfish(
                     persona_seed=self.session_id,
                     headless=True,
                     proxy={
@@ -219,6 +219,7 @@ class AdidasScraper:
                     } if self.proxy_url else None,
                     timezone="auto" if self.proxy_url else None
                 )
+                self.browser = await chromium_fish.start()
                 self.http_client = await self.browser.new_page()
                 await self.http_client.goto(cookie_url)          
                 await self.http_client.wait_for_selector('article[data-testid="plp-product-card"]')
@@ -278,7 +279,7 @@ class AdidasScraper:
                 #     geoip=True if self.proxy_url else False,
                 #     quiet=True
                 # )
-                self.browser: Browser = AsyncChromiumfish(
+                chromium_fish = AsyncChromiumfish(
                     persona_seed=self.session_id,
                     headless=True,
                     proxy={
@@ -288,7 +289,7 @@ class AdidasScraper:
                     } if self.proxy_url else None,
                     timezone="auto" if self.proxy_url else None
                 )
-                self.http_client = await self.browser.new_page()
+                self.browser = await chromium_fish.start()
                 await self.http_client.goto(cookie_url)          
                 await self.http_client.wait_for_selector('article[data-testid="plp-product-card"]')
                 await self.http_client.wait_for_timeout(2000)
