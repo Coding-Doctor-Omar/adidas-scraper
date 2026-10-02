@@ -210,7 +210,7 @@ class AdidasScraper:
                 self.context: BrowserContext = await launch_persistent_context(
                     user_data_dir="./my_actor/clearcote/",
                     fingerprint=f"{self.session_id}",
-                    platform="windows" if RUNNING_LOCALLY else "linux",
+                    platform="windows", # if RUNNING_LOCALLY else "linux",
                     disable_gpu_fingerprint=True,
                     headless=True,
                     proxy={
@@ -269,7 +269,7 @@ class AdidasScraper:
                 self.context: BrowserContext = await launch_persistent_context(
                     user_data_dir="./my_actor/clearcote/",
                     fingerprint=f"{self.session_id}",
-                    platform="windows" if RUNNING_LOCALLY else "linux",
+                    platform="windows", # if RUNNING_LOCALLY else "linux",
                     headless=True,
                     disable_gpu_fingerprint=True,
                     proxy={
