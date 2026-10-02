@@ -3,7 +3,7 @@
 	"actorSpecification": 1,
 	"name": "adidas-scraper",
 	"title": "Adidas Product & Reviews Scraper",
-	"description": "🔥 Most comprehensive Adidas dataset on Apify 🔥: products, prices, per-size stock, AI sentiments, color variants & media from 12 stores, plus reviews with photos, badges & buyer demographics. Export JSON, CSV, Excel.",
+	"description": "🔥 Most comprehensive Adidas dataset on Apify 🔥: products, prices, per-size stock, AI sentiments, reviews, color variants, media and more from 12 stores, plus review photos, badges & buyer demographics. Export JSON, CSV, Excel.",
 	"version": "0.0",
 	"buildTag": "latest",
 	"meta": {
