@@ -79,7 +79,7 @@
             "prefill": 50
         },
         "maxProductsPerSearch": {
-            "title": "Maximum Products",
+            "title": "Maximum Products Per Search",
             "description": "The maximum number of products to be scraped PER SEARCH. Use 0 for unlimited.",
             "type": "integer",
             "editor": "number",

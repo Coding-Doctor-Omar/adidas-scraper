@@ -214,9 +214,9 @@ class AdidasScraper:
                     disable_gpu_fingerprint=True,
                     headless=True,
                     proxy={
-                        "server": "http://" + self.proxy.split("@")[-1],
-                        "username": self.proxy.split("//")[-1].split(":")[0],
-                        "password": self.proxy.split("//")[-1].split(":")[1].split("@")[0]
+                        "server": "http://" + self.proxy_url.split("@")[-1],
+                        "username": self.proxy_url.split("//")[-1].split(":")[0],
+                        "password": self.proxy_url.split("//")[-1].split(":")[1].split("@")[0]
                     } if self.proxy_url else None,
                     geoip=True if self.proxy_url else False,
                     quiet=True
@@ -273,9 +273,9 @@ class AdidasScraper:
                     headless=True,
                     disable_gpu_fingerprint=True,
                     proxy={
-                        "server": "http://" + self.proxy.split("@")[-1],
-                        "username": self.proxy.split("//")[-1].split(":")[0],
-                        "password": self.proxy.split("//")[-1].split(":")[1].split("@")[0]
+                        "server": "http://" + self.proxy_url.split("@")[-1],
+                        "username": self.proxy_url.split("//")[-1].split(":")[0],
+                        "password": self.proxy_url.split("//")[-1].split(":")[1].split("@")[0]
                     } if self.proxy_url else None,
                     geoip=True if self.proxy_url else False,
                     quiet=True
