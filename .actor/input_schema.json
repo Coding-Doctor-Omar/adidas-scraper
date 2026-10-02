@@ -1,0 +1,138 @@
+{
+    "$schema": "https://apify.com/schemas/v1/input.ide.json",
+    "title": "Adidas Scraper | Products, Reviews & Monitoring",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "mode": {
+            "title": "Scraping Mode",
+            "type": "string",
+            "description": "Specifies whether to scrape products, monitor products, or scrape reviews. Products monitoring mode accepts direct product URLs only.",
+            "editor": "select",
+            "enum": [
+                "products",
+                "reviews"
+            ],
+            "enumTitles": [
+                "Products",
+                "Reviews"
+            ],
+            "default": "products",
+            "prefill": "products"
+        },
+        "country": {
+            "title": "🌍 Country",
+            "type": "string",
+            "description": "The Adidas website country to scrape (e.g. 'United States' will scrape products from https://www.adidas.com/us).",
+            "editor": "select",
+            "enum": [
+                "united-states",
+                "united-kingdom",
+                "canada-en",
+                "canada-fr",
+                "germany",
+                "france",
+                "netherlands",
+                "spain",
+                "italy",
+                "japan",
+                "australia",
+                "new-zealand"
+            ],
+            "enumTitles": [
+                "United States (.com/us)",
+                "United Kingdom (.co.uk)",
+                "Canada English (.ca/en)",
+                "Canada French (.ca/fr)",
+                "Germany (.de)",
+                "France (.fr)",
+                "Netherlands (.nl)",
+                "Spain (.es)",
+                "Italy (.it)",
+                "Japan (.jp)",
+                "Australia (.com.au)",
+                "New Zealand (.co.nz)"
+            ],
+            "default": "united-states",
+            "prefill": "united-states"
+        },
+        "searchUrls": {
+            "title": "Search URLs",
+            "type": "array",
+            "description": "The search URLs from which to scrape products.",
+            "editor": "requestListSources",
+            "example": [{"url": "https://www.adidas.com/us/search?q=blue+sport&sitePath=us"}]
+        },
+        "productUrls": {
+            "title": "Product URLs",
+            "type": "array",
+            "description": "The URLs for specific products to scrape.",
+            "editor": "requestListSources"
+        },
+        "maxProducts": {
+            "title": "Maximum Products",
+            "description": "The maximum total number of products to be scraped. Use 0 for unlimited.",
+            "type": "integer",
+            "editor": "number",
+            "minimum": 0,
+            "default": 50,
+            "prefill": 50
+        },
+        "maxProductsPerSearch": {
+            "title": "Maximum Products",
+            "description": "The maximum number of products to be scraped PER SEARCH. Use 0 for unlimited.",
+            "type": "integer",
+            "editor": "number",
+            "minimum": 0,
+            "default": 50,
+            "prefill": 50
+        },
+        "maxReviews": {
+            "title": "Maximum Reviews",
+            "description": "The maximum total number of reviews to scrape (for reviews mode only). Use 0 for unlimited.",
+            "type": "integer",
+            "editor": "number",
+            "minimum": 0,
+            "default": 500,
+            "prefill": 500
+        },
+        "maxReviewsPerProduct": {
+            "title": "Maximum Reviews Per Product",
+            "description": "The maximum number of reviews to scrape PER PRODUCT (for reviews mode only). Use 0 to scrape all available reviews for each product.",
+            "type": "integer",
+            "editor": "number",
+            "minimum": 0,
+            "default": 10,
+            "prefill": 10
+        },
+        "reviewsSort": {
+            "title": "Reviews Sort",
+            "description": "Specifies how to sort product reviews for each product.",
+            "type": "string",
+            "editor": "select",
+            "enum": [
+                "newest",
+                "relevant",
+                "helpful",
+                "highestRated",
+                "lowestRated"
+            ],
+            "enumTitles": [
+                "Newest",
+                "Relevant",
+                "Helpful",
+                "Highest Rated",
+                "Lowest Rated"
+            ],
+            "default": "newest",
+            "prefill": "newest"
+        },
+        "scrapeReviewsFromAllLanguages": {
+            "title": "Scrape Reviews from All Languages",
+            "description": "Scrape reviews from all languages instead of restricting to the selected country website. Note: The total number of scraped reviews may be significantly higher than the product's reviewCount you see in the products mode, as reviewCount reflects current country website metrics only.",
+            "type": "boolean",
+            "editor": "checkbox"
+        }
+    },
+    "required": []
+}
