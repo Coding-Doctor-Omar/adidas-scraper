@@ -1,46 +1,36 @@
-# 1. Force amd64 platform to prevent architecture/loader crashes on Mac M1/M2/M3 or ARM servers
-FROM --platform=linux/amd64 apify/actor-python:3.13
-
-USER root
-
-# 2. Install all core Linux graphics & rendering dependencies as root
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget \
-    ca-certificates \
-    libglib2.0-0 \
-    libnss3 \
-    libnspr4 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libdbus-1-3 \
-    libxkbcommon0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxfixes3 \
-    libxrandr2 \
-    libgbm1 \
-    libpango-1.0-0 \
-    libcairo2 \
-    libasound22 \
-    libxshmfence1 \
-    && rm -rf /var/lib/apt/lists/*
+# First, specify the base Docker image.
+# You can see the Docker images from Apify at https://hub.docker.com/r/apify/.
+# You can also use any other image from Docker Hub.
+FROM apify/actor-python:3.13
+RUN pip install playwright && playwright install-deps chromium
 
 USER myuser
 
-# 3. Copy requirements and install packages
+# Second, copy just requirements.txt into the Actor image,
+# since it should be the only file that affects the dependency install in the next step,
+# in order to speed up the build
 COPY --chown=myuser:myuser requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
 
-# 4. Download Chromiumfish binaries and grant executable permissions to ALL sub-files
-RUN chromiumfish fetch \
- && find /home/myuser/.cache/chromiumfish -type f -exec chmod +x {} +
+# Install the packages specified in requirements.txt,
+# Print the installed Python version, pip version
+# and all installed packages with their versions for debugging
+RUN echo "Python version:" \
+ && python --version \
+ && echo "Pip version:" \
+ && pip --version \
+ && echo "Installing dependencies:" \
+ && pip install -r requirements.txt \
+ && chromiumfish fetch \
+ && echo "All installed Python packages:" \
+ && pip freeze
 
-# 5. Copy project source code
+# Next, copy the remaining files and directories with the source code.
+# Since we do this after installing the dependencies, quick build will be really fast
+# for most source file changes.
 COPY --chown=myuser:myuser . ./
 
-# 6. Verify compilation
+# Use compileall to ensure the runnability of the Actor Python code.
 RUN python -m compileall -q my_actor/
 
+# Specify how to launch the source code of your Actor.
 CMD ["python", "-m", "my_actor"]
