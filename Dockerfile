@@ -1,19 +1,20 @@
-# First, specify the base Docker image.
-# You can see the Docker images from Apify at https://hub.docker.com/r/apify/.
-# You can also use any other image from Docker Hub.
 FROM apify/actor-python:3.13
 RUN pip install playwright && playwright install-deps chromium
 
+# Get the crashpad handler from Debian's chromium-common (extract only, don't install)
+RUN apt-get update \
+ && cd /tmp \
+ && apt-get download chromium-common \
+ && dpkg-deb -x chromium-common_*.deb /tmp/cc \
+ && mkdir -p /opt/crashpad \
+ && cp "$(find /tmp/cc -name chrome_crashpad_handler -type f | head -n1)" /opt/crashpad/ \
+ && chmod 755 /opt/crashpad/chrome_crashpad_handler \
+ && rm -rf /tmp/cc /tmp/chromium-common_*.deb /var/lib/apt/lists/*
+
 USER myuser
 
-# Second, copy just requirements.txt into the Actor image,
-# since it should be the only file that affects the dependency install in the next step,
-# in order to speed up the build
 COPY --chown=myuser:myuser requirements.txt ./
 
-# Install the packages specified in requirements.txt,
-# Print the installed Python version, pip version
-# and all installed packages with their versions for debugging
 RUN echo "Python version:" \
  && python --version \
  && echo "Pip version:" \
@@ -21,16 +22,15 @@ RUN echo "Python version:" \
  && echo "Installing dependencies:" \
  && pip install -r requirements.txt \
  && chromiumfish fetch \
+ && CHROME_DIR="$(dirname "$(find "$HOME/.cache/chromiumfish" -type f -name chrome | head -n1)")" \
+ && cp /opt/crashpad/chrome_crashpad_handler "$CHROME_DIR/" \
+ && test -x "$CHROME_DIR/chrome" \
+ && test -x "$CHROME_DIR/chrome_crashpad_handler" \
  && echo "All installed Python packages:" \
  && pip freeze
 
-# Next, copy the remaining files and directories with the source code.
-# Since we do this after installing the dependencies, quick build will be really fast
-# for most source file changes.
 COPY --chown=myuser:myuser . ./
 
-# Use compileall to ensure the runnability of the Actor Python code.
 RUN python -m compileall -q my_actor/
 
-# Specify how to launch the source code of your Actor.
 CMD ["python", "-m", "my_actor"]
