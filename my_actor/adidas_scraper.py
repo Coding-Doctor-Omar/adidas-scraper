@@ -1,5 +1,6 @@
-from playwright.async_api import TimeoutError as ClearcoteTimeoutError, BrowserContext, Page
+from playwright.async_api import TimeoutError as ClearcoteTimeoutError, BrowserContext, Page, Browser
 from clearcote.async_api import launch_persistent_context, GeoipError
+from chromiumfish.async_api import AsyncChromiumfish
 from playwright._impl._errors import TargetClosedError
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote, unquote, urlencode
@@ -150,6 +151,7 @@ class AdidasScraper:
         self.proxy_url = proxy_url
         self.session_id = session_id  # Using sticky residential proxies
         self.used_session_ids = set([self.session_id])
+        self.browser: Browser | None = None
         self.context: BrowserContext | None = None
         self.http_client: Page | None = None
         self.cookies = {}
@@ -207,21 +209,17 @@ class AdidasScraper:
         new_build_id_obtained = False
         for attempt in range(1, 6):
             try:
-                self.context: BrowserContext = await launch_persistent_context(
-                    user_data_dir="./my_actor/clearcote/",
-                    fingerprint=f"{self.session_id}",
-                    platform="windows", # if RUNNING_LOCALLY else "linux",
-                    disable_gpu_fingerprint=True,
+                self.browser: Browser = AsyncChromiumfish(
+                    persona_seed=self.session_id,
                     headless=True,
                     proxy={
                         "server": "http://" + self.proxy_url.split("@")[-1],
                         "username": self.proxy_url.split("//")[-1].split(":")[0],
                         "password": self.proxy_url.split("//")[-1].split(":")[1].split("@")[0]
                     } if self.proxy_url else None,
-                    geoip=True if self.proxy_url else False,
-                    quiet=True
+                    timezone="auto" if self.proxy_url else None
                 )
-                self.http_client = await self.context.new_page()
+                self.http_client = await self.browser.new_page()
                 await self.http_client.goto(cookie_url)          
                 await self.http_client.wait_for_selector('article[data-testid="plp-product-card"]')
                 await self.http_client.wait_for_timeout(2000)
@@ -263,24 +261,34 @@ class AdidasScraper:
         cookie_url = f"https://www.{REGIONS_DOMAINS[self.country]}/search?q="
 
         Actor.log.info("REFRESHING COOKIES...")
-        await self.context.close()
+        await self.browser.close()
         for attempt in range(1, 6):
             try:
-                self.context: BrowserContext = await launch_persistent_context(
-                    user_data_dir="./my_actor/clearcote/",
-                    fingerprint=f"{self.session_id}",
-                    platform="windows", # if RUNNING_LOCALLY else "linux",
+                # self.context: BrowserContext = await launch_persistent_context(
+                #     user_data_dir="./my_actor/clearcote/",
+                #     fingerprint=f"{self.session_id}",
+                #     platform="windows", # if RUNNING_LOCALLY else "linux",
+                #     headless=True,
+                #     disable_gpu_fingerprint=True,
+                #     proxy={
+                #         "server": "http://" + self.proxy_url.split("@")[-1],
+                #         "username": self.proxy_url.split("//")[-1].split(":")[0],
+                #         "password": self.proxy_url.split("//")[-1].split(":")[1].split("@")[0]
+                #     } if self.proxy_url else None,
+                #     geoip=True if self.proxy_url else False,
+                #     quiet=True
+                # )
+                self.browser: Browser = AsyncChromiumfish(
+                    persona_seed=self.session_id,
                     headless=True,
-                    disable_gpu_fingerprint=True,
                     proxy={
                         "server": "http://" + self.proxy_url.split("@")[-1],
                         "username": self.proxy_url.split("//")[-1].split(":")[0],
                         "password": self.proxy_url.split("//")[-1].split(":")[1].split("@")[0]
                     } if self.proxy_url else None,
-                    geoip=True if self.proxy_url else False,
-                    quiet=True
+                    timezone="auto" if self.proxy_url else None
                 )
-                self.http_client = await self.context.new_page()
+                self.http_client = await self.browser.new_page()
                 await self.http_client.goto(cookie_url)          
                 await self.http_client.wait_for_selector('article[data-testid="plp-product-card"]')
                 await self.http_client.wait_for_timeout(2000)

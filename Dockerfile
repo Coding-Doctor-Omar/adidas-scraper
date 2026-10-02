@@ -20,7 +20,7 @@ RUN echo "Python version:" \
  && pip --version \
  && echo "Installing dependencies:" \
  && pip install -r requirements.txt \
- && clearcote install \
+ && chromiumfish fetch \
  && echo "All installed Python packages:" \
  && pip freeze
 
