@@ -236,7 +236,7 @@ class AdidasScraper:
                             break
                     self.proxy_url = await self.proxy_cfg.new_url(session_id=f"{self.session_id}")
                 
-                await self.context.close()
+                await self.browser.close()
                 continue
             else:
                 new_build_id_obtained = True
@@ -303,7 +303,7 @@ class AdidasScraper:
                             break
                     self.proxy_url = await self.proxy_cfg.new_url(session_id=f"{self.session_id}")
                 
-                await self.context.close()
+                await self.browser.close()
                 continue
             else:
                 cookie_refresh_successful = True
