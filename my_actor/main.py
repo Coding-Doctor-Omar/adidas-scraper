@@ -75,4 +75,4 @@ async def main() -> None:
             
             if run_successful:
                 Actor.log.info("Done! 🎉")
-                Actor.log.info("If this Actor is helpful to you, consider leaving a 5-star review on Apify as this helps me a lot 👇\nhttps://console.apify.com/actors/mw5JvRF7kSxjfNqdu/reviews")
+                Actor.log.info("If this Actor is helpful to you, consider leaving a 5-star review on Apify as this helps me a lot 👇\nhttps://console.apify.com/actors/HO6qdaJ2l9UnhjgnZ/reviews")

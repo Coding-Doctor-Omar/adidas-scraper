@@ -1,7 +1,7 @@
 # 🔥 Adidas Product & Reviews Scraper 🔥
 
 <p align="center">
-    <img src="./images/adidas_scraper.png" width="350" alt="adidas products & scraper logo">
+    <img src="https://images.apifyusercontent.com/jk_XKVm_sZDSZKUBSs4mKdzjj3hos78tiA_oo_pyliY/cb:1/aHR0cHM6Ly9hcGlmeS1pbWFnZS11cGxvYWRzLXByb2QuczMudXMtZWFzdC0xLmFtYXpvbmF3cy5jb20vOVpGY1BsVEhQM09Cc3hFN0ktYWN0b3ItSE82cWRhSjJsOVVuaGpnblotdFVmTHB2ZFR4OS1hZGlkYXNfc2NyYXBlci5wbmc.png" width="350" alt="adidas products & reviews scraper logo">
 </p>
 
 <p align="center">
@@ -17,7 +17,7 @@
 </p>
 
 <p align="center" style="border: 1px solid green; padding: 10px; border-radius: 12px;">
-  <b>Like this Actor?</b> <i>Please leave a 5-star <a href="https://console.apify.com/actors/mw5JvRF7kSxjfNqdu/reviews">review</a> on Apify to support me and help others find the Actor ❤️.</i>
+  <b>Like this Actor?</b> <i>Please leave a 5-star <a href="https://console.apify.com/actors/HO6qdaJ2l9UnhjgnZ/reviews">review</a> on Apify to support me and help others find the Actor ❤️.</i>
 </p>
 
 <p align="center"><a href="https://apify.com/coding-doctor-omar/adidas-scraper/input-schema">Input</a> • <a href="https://apify.com/coding-doctor-omar/adidas-scraper/api/python">API Docs</a> • <a href="#changelog">Changelog</a></p>
