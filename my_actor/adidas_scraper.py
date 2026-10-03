@@ -1,14 +1,10 @@
 from playwright.async_api import TimeoutError as ClearcoteTimeoutError, BrowserContext, Page, Browser
 from clearcote.async_api import launch_persistent_context, GeoipError
-from invisible_playwright.async_api import InvisiblePlaywright
 from playwright._impl._errors import TargetClosedError
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote, unquote, urlencode
-from camoufox.exceptions import UnknownIPLocation
-from camoufox.async_api import AsyncCamoufox
 from collections.abc import AsyncGenerator
 from apify import ProxyConfiguration
-from camoufox import DefaultAddons
 from functools import wraps
 from typing import Literal
 from apify import Actor
