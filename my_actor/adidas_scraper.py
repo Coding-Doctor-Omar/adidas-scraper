@@ -206,7 +206,14 @@ class AdidasScraper:
 
         # An Apify Key-Value Store will be intialized if the user is on the products-monitoring mode.
         # self.kv_store: KeyValueStore | None = None
-
+    
+    def rotate_proxy(self) -> None:
+        self.proxy = {
+            "server": "http://" + self.proxy_url.split("@")[-1],
+            "username": self.proxy_url.split("//")[-1].split(":")[0],
+            "password": self.proxy_url.split("//")[-1].split(":")[1].split("@")[0]
+        } if self.proxy_url else None
+    
     async def initialize(self) -> None:
         # Get the initial session cookies and build ID.
         country_text = self.country.replace("-", " ").upper()
@@ -230,8 +237,8 @@ class AdidasScraper:
                     user_data_dir="./my_actor/clearcote/",
                     fingerprint=f"{self.session_id}",
                     platform=self.platform,
-                    headless=True,
-                    disable_gpu_fingerprint=True,
+                    headless=False,
+                    # disable_gpu_fingerprint=True,
                     proxy=self.proxy,
                     geoip=self.geoip,
                     quiet=True,
@@ -264,6 +271,7 @@ class AdidasScraper:
                             self.used_session_ids.add(self.session_id)
                             break
                     self.proxy_url = await self.proxy_cfg.new_url(session_id=f"{self.session_id}")
+                    self.rotate_proxy()
                 
                 await self.context.close()
                 continue
@@ -286,7 +294,7 @@ class AdidasScraper:
         while self.is_running:
             try:
                 card_locator = self.http_client.locator('article[data-testid="plp-product-card"]')
-                page_cards = self.http_client.query_selector_all('article[data-testid="plp-product-card"]')
+                page_cards = await self.http_client.query_selector_all('article[data-testid="plp-product-card"]')
                 num_page_cards = len(page_cards)
                 target_card = card_locator.nth(random.randint(0, num_page_cards - 1))
                 await target_card.hover()
@@ -310,14 +318,21 @@ class AdidasScraper:
 
         Actor.log.info("REFRESHING COOKIES...")
         await self.context.close()
+        if self.proxy_cfg:
+            while True:
+                self.session_id = f"{random.randint(0, 999999)}"
+                if self.session_id not in self.used_session_ids:
+                    self.used_session_ids.add(self.session_id)
+                    break
+            self.rotate_proxy()
         for attempt in range(1, 6):
             try:
                 self.context: BrowserContext = await launch_persistent_context(
                     user_data_dir="./my_actor/clearcote/",
                     fingerprint=f"{self.session_id}",
                     platform=self.platform,
-                    headless=True,
-                    disable_gpu_fingerprint=True,
+                    headless=False,
+                    # disable_gpu_fingerprint=True,
                     proxy=self.proxy,
                     geoip=self.geoip,
                     quiet=True,
@@ -361,6 +376,7 @@ class AdidasScraper:
                             self.used_session_ids.add(self.session_id)
                             break
                     self.proxy_url = await self.proxy_cfg.new_url(session_id=f"{self.session_id}")
+                    self.rotate_proxy()
                 
                 await self.browser.close()
                 continue
