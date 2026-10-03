@@ -7,6 +7,7 @@ from apify import ProxyConfiguration
 from functools import wraps
 from typing import Literal
 from shardx import ShardX
+from shardx.proxy import ParsedProxy
 from apify import Actor
 import asyncio
 import random
@@ -85,6 +86,23 @@ BAZAARVOICE_LOCALES = {
     "australia": "en_AU",
     "new-zealand": "en_NZ"
 }
+
+def patched_to_arg(self) -> str:
+        """Format as ShardX engine's `--proxy-server` argument.  Includes
+        URL-encoded `user:pass@` when present — the ShardX fork honours
+        inline credentials in `--proxy-server` (stock Chromium does not)
+        so this is the only mechanism the SDK needs to authenticate
+        SOCKS5 / HTTP-proxy traffic.  Mirrors the launcher's Rust
+        `ProxyEntry::to_proxy_server_arg` exactly.
+        """
+        host_port = f"{self.host}:{self.port}"
+        if self.username or self.password:
+            u = quote((self.username or ""), safe=",")
+            p = quote((self.password or ""), safe="")
+            return f"{self.scheme}://{u}:{p}@{host_port}"
+        return f"{self.scheme}://{host_port}"
+
+ParsedProxy.to_arg = patched_to_arg
 
 def wait_for_cookie_refresh(func):
     @wraps(func)
