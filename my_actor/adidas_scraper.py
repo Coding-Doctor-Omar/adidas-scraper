@@ -1,5 +1,4 @@
 from playwright.async_api import TimeoutError as ClearcoteTimeoutError, BrowserContext, Page, Browser
-from clearcote.async_api import launch_persistent_context, GeoipError
 from playwright._impl._errors import TargetClosedError
 from chromiumfish.async_api import AsyncChromiumfish
 from datetime import datetime, timedelta, timezone
