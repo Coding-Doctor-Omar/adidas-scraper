@@ -233,7 +233,7 @@ class AdidasScraper:
                 # )
                 shard_x = ShardX(cache_dir=None if RUNNING_LOCALLY else "/home/myuser/shardx")
                 profile = shard_x.create_profile(platform=self.platform.title())
-                self.session = shard_x.session(profile, proxy=self.proxy, headless=True)
+                self.session = shard_x.session(profile, proxy=self.proxy_url, headless=True)
                 self.browser = await self.session.__aenter__()
                 self.context = self.browser.contexts[0]
                 # self.browser = await chromium_fish.start()
@@ -325,7 +325,7 @@ class AdidasScraper:
             try:
                 shard_x = ShardX(cache_dir=None if RUNNING_LOCALLY else "/home/myuser/shardx")
                 profile = shard_x.create_profile(platform=self.platform.title())
-                self.session = shard_x.session(profile, proxy=self.proxy, headless=True)
+                self.session = shard_x.session(profile, proxy=self.proxy_url, headless=True)
                 self.browser = await self.session.__aenter__()
                 self.context = self.browser.contexts[0]
                 self.http_client = await self.context.new_page()
