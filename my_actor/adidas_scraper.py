@@ -166,8 +166,10 @@ class AdidasScraper:
             "username": self.proxy_url.split("//")[-1].split(":")[0],
             "password": self.proxy_url.split("//")[-1].split(":")[1].split("@")[0]
         } if self.proxy_url else None
+        self.geoip: bool = True if self.proxy_url else False
         self.is_running = True
         self.page_interaction_task = None
+        self.platform = "windows" if RUNNING_LOCALLY else "linux"
 
         self.adidas_store_build_id: str | None = None
 
@@ -231,15 +233,11 @@ class AdidasScraper:
                 self.context: BrowserContext = await launch_persistent_context(
                     user_data_dir="./my_actor/clearcote/",
                     fingerprint=f"{self.session_id}",
-                    platform="windows" if RUNNING_LOCALLY else "linux",
+                    platform=self.platform,
                     headless=False,
                     disable_gpu_fingerprint=True,
-                    proxy={
-                        "server": "http://" + self.proxy_url.split("@")[-1],
-                        "username": self.proxy_url.split("//")[-1].split(":")[0],
-                        "password": self.proxy_url.split("//")[-1].split(":")[1].split("@")[0]
-                    } if self.proxy_url else None,
-                    geoip=True if self.proxy_url else False,
+                    proxy=self.proxy,
+                    geoip=self.geoip,
                     quiet=True,
                     humanize=True
                 )
@@ -321,15 +319,11 @@ class AdidasScraper:
                 self.context: BrowserContext = await launch_persistent_context(
                     user_data_dir="./my_actor/clearcote/",
                     fingerprint=f"{self.session_id}",
-                    platform="windows" if RUNNING_LOCALLY else "linux",
+                    platform=self.platform,
                     headless=True,
                     disable_gpu_fingerprint=True,
-                    proxy={
-                        "server": "http://" + self.proxy_url.split("@")[-1],
-                        "username": self.proxy_url.split("//")[-1].split(":")[0],
-                        "password": self.proxy_url.split("//")[-1].split(":")[1].split("@")[0]
-                    } if self.proxy_url else None,
-                    geoip=True if self.proxy_url else False,
+                    proxy=self.proxy,
+                    geoip=self.geoip,
                     quiet=True,
                     humanize=True
                 )
