@@ -310,6 +310,7 @@ class AdidasScraper:
                 if self.session_id not in self.used_session_ids:
                     self.used_session_ids.add(self.session_id)
                     break
+            self.proxy_url = await self.proxy_cfg.new_url(session_id=self.session_id)
             self.rotate_proxy()
         for attempt in range(1, 6):
             try:
