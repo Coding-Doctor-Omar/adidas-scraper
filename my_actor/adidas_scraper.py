@@ -7,7 +7,6 @@ from apify import ProxyConfiguration
 from functools import wraps
 from typing import Literal
 from shardx import ShardX
-from shardx.proxy import ParsedProxy
 from apify import Actor
 import asyncio
 import random
@@ -86,23 +85,6 @@ BAZAARVOICE_LOCALES = {
     "australia": "en_AU",
     "new-zealand": "en_NZ"
 }
-
-def patched_to_arg(self) -> str:
-        """Format as ShardX engine's `--proxy-server` argument.  Includes
-        URL-encoded `user:pass@` when present — the ShardX fork honours
-        inline credentials in `--proxy-server` (stock Chromium does not)
-        so this is the only mechanism the SDK needs to authenticate
-        SOCKS5 / HTTP-proxy traffic.  Mirrors the launcher's Rust
-        `ProxyEntry::to_proxy_server_arg` exactly.
-        """
-        host_port = f"{self.host}:{self.port}"
-        if self.username or self.password:
-            u = quote((self.username or ""), safe=",")
-            p = quote((self.password or ""), safe="")
-            return f"{self.scheme}://{u}:{p}@{host_port}"
-        return f"{self.scheme}://{host_port}"
-
-ParsedProxy.to_arg = patched_to_arg
 
 def wait_for_cookie_refresh(func):
     @wraps(func)
@@ -253,7 +235,7 @@ class AdidasScraper:
                 # )
                 shard_x = ShardX(cache_dir=None if RUNNING_LOCALLY else "/home/myuser/shardx")
                 profile = shard_x.create_profile(platform=self.platform.title())
-                self.session = shard_x.session(profile, proxy=self.proxy_url, headless=True, extra_args=["--no-sandbox", "--disable-dev-shm-usage"] if not RUNNING_LOCALLY else [])
+                self.session = shard_x.session(profile, proxy=self.proxy_url, headless=True, extra_args=["--no-sandbox", "--disable-dev-shm-usage", f"--proxy-server={self.proxy_url}"] if not RUNNING_LOCALLY else [])
                 self.browser = await self.session.__aenter__()
                 self.context = self.browser.contexts[0]
                 # self.browser = await chromium_fish.start()
@@ -345,7 +327,7 @@ class AdidasScraper:
             try:
                 shard_x = ShardX(cache_dir=None if RUNNING_LOCALLY else "/home/myuser/shardx")
                 profile = shard_x.create_profile(platform=self.platform.title())
-                self.session = shard_x.session(profile, proxy=self.proxy_url, headless=True, extra_args=["--no-sandbox", "--disable-dev-shm-usage"] if not RUNNING_LOCALLY else [])
+                self.session = shard_x.session(profile, proxy=self.proxy_url, headless=True, extra_args=["--no-sandbox", "--disable-dev-shm-usage", f"--proxy-server={self.proxy_url}"] if not RUNNING_LOCALLY else [])
                 self.browser = await self.session.__aenter__()
                 self.context = self.browser.contexts[0]
                 self.http_client = await self.context.new_page()
