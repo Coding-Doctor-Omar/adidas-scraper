@@ -17,7 +17,7 @@ RUN echo "Python version:" \
  && pip --version \
  && echo "Installing dependencies:" \
  && pip install -r requirements.txt \
- && clearcote install
+ && clearcote install \
  && echo "All installed Python packages:" \
  && pip freeze
 
