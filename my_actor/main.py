@@ -3,6 +3,7 @@ from .adidas_scraper import AdidasScraper
 from apify.errors import ApifyApiError
 from apify import Actor
 import random
+from urllib.parse import urlencode
 
 
 async def main() -> None:
@@ -37,6 +38,7 @@ async def main() -> None:
             proxy_cfg = await Actor.create_proxy_configuration(groups=["RESIDENTIAL"], country_code=country_code)
             session_id = f"{random.randint(0, 999999)}"
             proxy_url = await proxy_cfg.new_url(session_id=session_id)
+            proxy_url = f"http://{urlencode(proxy_url.split('//')[-1].split(':')[0])}:{proxy_url.split('//')[-1].split(':')[1].split('@')[0]}@{proxy_url.split("@")[-1]}"
         except (AttributeError, ValueError):
             session_id = ""
             session_id = proxy_cfg = proxy_url = None

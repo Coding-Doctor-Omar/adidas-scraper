@@ -208,12 +208,14 @@ class AdidasScraper:
         # An Apify Key-Value Store will be intialized if the user is on the products-monitoring mode.
         # self.kv_store: KeyValueStore | None = None
     
-    def rotate_proxy(self) -> None:
-        self.proxy = {
-            "server": "http://" + self.proxy_url.split("@")[-1],
-            "username": self.proxy_url.split("//")[-1].split(":")[0],
-            "password": self.proxy_url.split("//")[-1].split(":")[1].split("@")[0]
-        } if self.proxy_url else None
+    def format_proxy_url(self) -> None:
+        # self.proxy = {
+        #     "server": "http://" + self.proxy_url.split("@")[-1],
+        #     "username": self.proxy_url.split("//")[-1].split(":")[0],
+        #     "password": self.proxy_url.split("//")[-1].split(":")[1].split("@")[0]
+        # } if self.proxy_url else None
+        if self.proxy_url:
+            self.proxy_url = f"http://{urlencode(self.proxy_url.split('//')[-1].split(':')[0])}:{self.proxy_url.split('//')[-1].split(':')[1].split('@')[0]}@{self.proxy_url.split("@")[-1]}"
     
     async def initialize(self) -> None:
         # Get the initial session cookies and build ID.
@@ -265,7 +267,7 @@ class AdidasScraper:
                             self.used_session_ids.add(self.session_id)
                             break
                     self.proxy_url = await self.proxy_cfg.new_url(session_id=f"{self.session_id}")
-                    self.rotate_proxy()
+                    self.format_proxy_url()
                 
                 await self.session.__aexit__(None, None, None)
                 continue
@@ -320,7 +322,7 @@ class AdidasScraper:
                     self.used_session_ids.add(self.session_id)
                     break
             self.proxy_url = await self.proxy_cfg.new_url(session_id=self.session_id)
-            self.rotate_proxy()
+            self.format_proxy_url()
         for attempt in range(1, 6):
             try:
                 shard_x = ShardX(cache_dir=None if RUNNING_LOCALLY else "/home/myuser/shardx")
@@ -351,7 +353,7 @@ class AdidasScraper:
                             self.used_session_ids.add(self.session_id)
                             break
                     self.proxy_url = await self.proxy_cfg.new_url(session_id=f"{self.session_id}")
-                    self.rotate_proxy()
+                    self.format_proxy_url()
                 
                 await self.close()
                 continue
