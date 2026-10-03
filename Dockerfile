@@ -2,7 +2,7 @@
 # You can see the Docker images from Apify at https://hub.docker.com/r/apify/.
 # You can also use any other image from Docker Hub.
 FROM apify/actor-python-playwright-camoufox:3.14-1.62.0
-RUN plawright install-deps chromium
+RUN playwright install-deps chromium
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
