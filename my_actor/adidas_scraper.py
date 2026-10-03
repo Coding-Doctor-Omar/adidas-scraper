@@ -227,12 +227,13 @@ class AdidasScraper:
                     persona_seed=self.session_id,
                     headless=False,
                     proxy=self.proxy,
-                    timezone="auto" if self.proxy_url else None
+                    timezone="auto" if self.proxy_url else None,
+                    args=["--no-sandbox", "--disable-dev-shm-usage"]
                 )
                 self.browser = await chromium_fish.start()
                 self.http_client = await self.browser.new_page()
                 await self.http_client.goto(cookie_url)          
-                await self.http_client.wait_for_selector('article[data-testid="plp-product-card"]')
+                await self.http_client.wait_for_selector('article[data-testid="plp-product-card"]', timeout=10000)
                 
                 try:
                     modal_btn = await self.http_client.wait_for_selector('#glass-gdpr-default-consent-accept-button', timeout=5000)
@@ -318,12 +319,13 @@ class AdidasScraper:
                     persona_seed=self.session_id,
                     headless=False,
                     proxy=self.proxy,
-                    timezone="auto" if self.proxy_url else None
+                    timezone="auto" if self.proxy_url else None,
+                    args=["--no-sandbox", "--disable-dev-shm-usage"]
                 )
                 self.browser = await chromium_fish.start()
                 self.http_client = await self.browser.new_page()
                 await self.http_client.goto(cookie_url)
-                await self.http_client.wait_for_selector('article[data-testid="plp-product-card"]')
+                await self.http_client.wait_for_selector('article[data-testid="plp-product-card"]', timeout=10000)
                 # await self.http_client.wait_for_timeout(2000)
                 
                 try:
