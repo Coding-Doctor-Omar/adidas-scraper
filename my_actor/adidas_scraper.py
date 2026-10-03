@@ -234,7 +234,7 @@ class AdidasScraper:
                     user_data_dir="./my_actor/clearcote/",
                     fingerprint=f"{self.session_id}",
                     platform=self.platform,
-                    headless=False,
+                    headless=True,
                     disable_gpu_fingerprint=True,
                     proxy=self.proxy,
                     geoip=self.geoip,
