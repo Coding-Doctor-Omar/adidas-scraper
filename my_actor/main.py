@@ -34,7 +34,7 @@ async def main() -> None:
         run_successful = True
         
         try:
-            proxy_cfg = await Actor.create_proxy_configuration(groups=["RESIDENTIAL"], country_code=country_code)
+            proxy_cfg = await Actor.create_proxy_configuration(groups=["RESIDENTIAL"], country_code="EG")
             session_id = f"{random.randint(0, 999999)}"
             proxy_url = await proxy_cfg.new_url(session_id=session_id)
         except (AttributeError, ValueError):
