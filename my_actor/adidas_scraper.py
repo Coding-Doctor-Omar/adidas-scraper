@@ -209,13 +209,13 @@ class AdidasScraper:
         # self.kv_store: KeyValueStore | None = None
     
     def format_proxy_url(self) -> None:
-        # self.proxy = {
-        #     "server": "http://" + self.proxy_url.split("@")[-1],
-        #     "username": self.proxy_url.split("//")[-1].split(":")[0],
-        #     "password": self.proxy_url.split("//")[-1].split(":")[1].split("@")[0]
-        # } if self.proxy_url else None
-        if self.proxy_url:
-            self.proxy_url = f"http://{quote(self.proxy_url.split('//')[-1].split(':')[0])}:{self.proxy_url.split('//')[-1].split(':')[1].split('@')[0]}@{self.proxy_url.split("@")[-1]}"
+        self.proxy = {
+            "server": "http://" + self.proxy_url.split("@")[-1],
+            "username": self.proxy_url.split("//")[-1].split(":")[0],
+            "password": self.proxy_url.split("//")[-1].split(":")[1].split("@")[0]
+        } if self.proxy_url else None
+        # if self.proxy_url:
+        #     self.proxy_url = f"http://{quote(self.proxy_url.split('//')[-1].split(':')[0])}:{self.proxy_url.split('//')[-1].split(':')[1].split('@')[0]}@{self.proxy_url.split("@")[-1]}"
     
     async def initialize(self) -> None:
         # Get the initial session cookies and build ID.
@@ -870,5 +870,7 @@ class AdidasScraper:
                     
                     yield self.parse_item(item)
         finally:
+            self.is_running = False
             await self.close()
             runner.cancel()
+            self.page_interaction_task.cancel()

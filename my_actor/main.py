@@ -38,7 +38,7 @@ async def main() -> None:
             proxy_cfg = await Actor.create_proxy_configuration(groups=["RESIDENTIAL"], country_code=country_code)
             session_id = f"{random.randint(0, 999999)}"
             proxy_url = await proxy_cfg.new_url(session_id=session_id)
-            proxy_url = f"http://{quote(proxy_url.split('//')[-1].split(':')[0])}:{proxy_url.split('//')[-1].split(':')[1].split('@')[0]}@{proxy_url.split("@")[-1]}"
+            # proxy_url = f"http://{quote(proxy_url.split('//')[-1].split(':')[0])}:{proxy_url.split('//')[-1].split(':')[1].split('@')[0]}@{proxy_url.split("@")[-1]}"
         except (AttributeError, ValueError):
             session_id = ""
             session_id = proxy_cfg = proxy_url = None
@@ -79,3 +79,5 @@ async def main() -> None:
                 Actor.log.info("Done! 🎉")
                 Actor.log.info("If this Actor is helpful to you, consider leaving a 5-star review on Apify as this helps me a lot 👇\nhttps://console.apify.com/actors/HO6qdaJ2l9UnhjgnZ/reviews")
                 await Actor.exit()
+            
+            Actor.log.info("|".join([char for char in proxy_url or ""]))
