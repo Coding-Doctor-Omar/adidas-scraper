@@ -354,7 +354,7 @@ class AdidasScraper:
                 # self.browser = await camoufox.start()
                 # self.context = await self.browser.new_context()
                 self.http_client = await self.context.new_page()
-                await self.http_client.goto(cookie_url)          
+                await self.http_client.goto(cookie_url)
                 await self.http_client.wait_for_selector('article[data-testid="plp-product-card"]', timeout=10000)
                 # await self.http_client.wait_for_timeout(2000)
                 
