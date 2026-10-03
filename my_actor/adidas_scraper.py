@@ -232,7 +232,7 @@ class AdidasScraper:
                 self.browser = await chromium_fish.start()
                 self.http_client = await self.browser.new_page()
                 await self.http_client.goto(cookie_url)          
-                await self.http_client.wait_for_selector('article[data-testid="plp-product-card"]', timeout=10000)
+                await self.http_client.wait_for_selector('article[data-testid="plp-product-card"]')
                 
                 try:
                     modal_btn = await self.http_client.wait_for_selector('#glass-gdpr-default-consent-accept-button', timeout=5000)
@@ -323,7 +323,7 @@ class AdidasScraper:
                 self.browser = await chromium_fish.start()
                 self.http_client = await self.browser.new_page()
                 await self.http_client.goto(cookie_url)
-                await self.http_client.wait_for_selector('article[data-testid="plp-product-card"]', timeout=10000)
+                await self.http_client.wait_for_selector('article[data-testid="plp-product-card"]')
                 # await self.http_client.wait_for_timeout(2000)
                 
                 try:
