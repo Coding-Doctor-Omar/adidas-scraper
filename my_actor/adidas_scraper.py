@@ -1,12 +1,12 @@
 from playwright.async_api import TimeoutError as ClearcoteTimeoutError, BrowserContext, Page, Browser
 from playwright._impl._errors import TargetClosedError
-from chromiumfish.async_api import AsyncChromiumfish
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote, unquote, urlencode
 from collections.abc import AsyncGenerator
 from apify import ProxyConfiguration
 from functools import wraps
 from typing import Literal
+from shardx import ShardX
 from apify import Actor
 import asyncio
 import random
@@ -166,6 +166,7 @@ class AdidasScraper:
         self.is_running = True
         self.page_interaction_task = None
         self.platform = "windows" if RUNNING_LOCALLY else "linux"
+        self.close_lock = asyncio.Lock()
 
         self.adidas_store_build_id: str | None = None
 
@@ -223,15 +224,20 @@ class AdidasScraper:
         new_build_id_obtained = False
         for attempt in range(1, 6):
             try:
-                chromium_fish = AsyncChromiumfish(
-                    persona_seed=self.session_id,
-                    headless=False,
-                    proxy=self.proxy,
-                    timezone="auto" if self.proxy_url else None,
-                    args=["--no-sandbox", "--disable-dev-shm-usage"]
-                )
-                self.browser = await chromium_fish.start()
-                self.http_client = await self.browser.new_page()
+                # chromium_fish = AsyncChromiumfish(
+                #     persona_seed=self.session_id,
+                #     headless=False,
+                #     proxy=self.proxy,
+                #     timezone="auto" if self.proxy_url else None,
+                #     args=["--no-sandbox", "--disable-dev-shm-usage"]
+                # )
+                shard_x = ShardX(cache_dir=None if RUNNING_LOCALLY else "/home/myuser/shardx")
+                profile = shard_x.create_profile(platform=self.platform.title())
+                self.session = shard_x.session(profile, proxy=self.proxy, headless=True)
+                self.browser = await self.session.__aenter__()
+                self.context = self.browser.contexts[0]
+                # self.browser = await chromium_fish.start()
+                self.http_client = await self.context.new_page()
                 await self.http_client.goto(cookie_url)          
                 await self.http_client.wait_for_selector('article[data-testid="plp-product-card"]', timeout=10000)
                 
@@ -249,7 +255,8 @@ class AdidasScraper:
                 
                 page_html = await self.http_client.inner_html("html")
                 self.adidas_store_build_id = page_html.split("/_buildManifest.js")[0].split("/")[-1]
-            except (ValueError, ClearcoteTimeoutError):
+            except (ValueError, ClearcoteTimeoutError) as e:
+                Actor.log.error(e)
                 Actor.log.error(f"❌ CONNECTION ATTEMPT {attempt}/5 FAILED DUE TO A BAD PROXY. RETRYING...")
                 if self.proxy_cfg:
                     while True:
@@ -260,7 +267,7 @@ class AdidasScraper:
                     self.proxy_url = await self.proxy_cfg.new_url(session_id=f"{self.session_id}")
                     self.rotate_proxy()
                 
-                await self.browser.close()
+                await self.session.__aexit__(None, None, None)
                 continue
             else:
                 new_build_id_obtained = True
@@ -275,7 +282,8 @@ class AdidasScraper:
             raise FatalAntiBotBlockError(f"COULD NOT ESTABLISH CONNECTION TO ADIDAS {country_text} AFTER 5 ATTEMPTS.")  # If the new build ID cannot be obtained, the scraper should crash here.
 
     async def close(self) -> None:
-        await self.browser.close()
+        async with self.close_lock:
+            await self.session.__aexit__(None, None, None)
     
     async def interact_naturally_with_page(self) -> None:
         while self.is_running:
@@ -304,7 +312,7 @@ class AdidasScraper:
         cookie_url = f"https://www.{REGIONS_DOMAINS[self.country]}/search?q="
 
         Actor.log.info("REFRESHING COOKIES...")
-        await self.browser.close()
+        await self.close()
         if self.proxy_cfg:
             while True:
                 self.session_id = f"{random.randint(0, 999999)}"
@@ -315,15 +323,12 @@ class AdidasScraper:
             self.rotate_proxy()
         for attempt in range(1, 6):
             try:
-                chromium_fish = AsyncChromiumfish(
-                    persona_seed=self.session_id,
-                    headless=False,
-                    proxy=self.proxy,
-                    timezone="auto" if self.proxy_url else None,
-                    args=["--no-sandbox", "--disable-dev-shm-usage"]
-                )
-                self.browser = await chromium_fish.start()
-                self.http_client = await self.browser.new_page()
+                shard_x = ShardX(cache_dir=None if RUNNING_LOCALLY else "/home/myuser/shardx")
+                profile = shard_x.create_profile(platform=self.platform.title())
+                self.session = shard_x.session(profile, proxy=self.proxy, headless=True)
+                self.browser = await self.session.__aenter__()
+                self.context = self.browser.contexts[0]
+                self.http_client = await self.context.new_page()
                 await self.http_client.goto(cookie_url)
                 await self.http_client.wait_for_selector('article[data-testid="plp-product-card"]', timeout=10000)
                 # await self.http_client.wait_for_timeout(2000)
@@ -348,7 +353,7 @@ class AdidasScraper:
                     self.proxy_url = await self.proxy_cfg.new_url(session_id=f"{self.session_id}")
                     self.rotate_proxy()
                 
-                await self.browser.close()
+                await self.close()
                 continue
             else:
                 cookie_refresh_successful = True
@@ -863,5 +868,5 @@ class AdidasScraper:
                     
                     yield self.parse_item(item)
         finally:
-            await self.browser.close()
+            await self.close()
             runner.cancel()
