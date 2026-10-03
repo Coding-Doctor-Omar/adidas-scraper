@@ -1,7 +1,7 @@
 from playwright.async_api import TimeoutError as ClearcoteTimeoutError, BrowserContext, Page, Browser
 from playwright._impl._errors import TargetClosedError
 from datetime import datetime, timedelta, timezone
-from urllib.parse import quote, unquote, urlencode
+from urllib.parse import quote, unquote, quote
 from collections.abc import AsyncGenerator
 from apify import ProxyConfiguration
 from functools import wraps
@@ -215,7 +215,7 @@ class AdidasScraper:
         #     "password": self.proxy_url.split("//")[-1].split(":")[1].split("@")[0]
         # } if self.proxy_url else None
         if self.proxy_url:
-            self.proxy_url = f"http://{urlencode(self.proxy_url.split('//')[-1].split(':')[0])}:{self.proxy_url.split('//')[-1].split(':')[1].split('@')[0]}@{self.proxy_url.split("@")[-1]}"
+            self.proxy_url = f"http://{quote(self.proxy_url.split('//')[-1].split(':')[0])}:{self.proxy_url.split('//')[-1].split(':')[1].split('@')[0]}@{self.proxy_url.split("@")[-1]}"
     
     async def initialize(self) -> None:
         # Get the initial session cookies and build ID.
@@ -544,7 +544,7 @@ class AdidasScraper:
     @wait_for_cookie_refresh
     async def make_get_request(self, url: str, operation_type: Literal["product_search", "product_detail", "review_page", "rating_page"], params: dict={}) -> dict:
         async with self.http_request_semaphore:
-            req_url = url + ("?" if params else "") + urlencode(params)
+            req_url = url + ("?" if params else "") + quote(params)
             try:
                 # signal: AbortSignal.timeout(30000)
                 raw_data, status_code = await asyncio.wait_for(
