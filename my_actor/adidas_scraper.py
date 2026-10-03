@@ -860,5 +860,5 @@ class AdidasScraper:
                     
                     yield self.parse_item(item)
         finally:
-            await self.context.close()
+            await self.browser.close()
             runner.cancel()
