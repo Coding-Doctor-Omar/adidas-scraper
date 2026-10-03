@@ -1,6 +1,7 @@
 from playwright.async_api import TimeoutError as ClearcoteTimeoutError, BrowserContext, Page, Browser
 from clearcote.async_api import launch_persistent_context, GeoipError
 from playwright._impl._errors import TargetClosedError
+from chromiumfish.async_api import AsyncChromiumfish
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote, unquote, urlencode
 from collections.abc import AsyncGenerator
@@ -223,28 +224,14 @@ class AdidasScraper:
         new_build_id_obtained = False
         for attempt in range(1, 6):
             try:
-                # camoufox = AsyncCamoufox(
-                #     os="windows" if RUNNING_LOCALLY else "linux",
-                #     headless=True,
-                #     humanize=True,
-                #     fingerprint_preset=False,
-                #     proxy=self.proxy if self.proxy_url else None,
-                #     geoip=True if self.proxy_url else False,
-                #     exclude_addons=[DefaultAddons.UBO]
-                # )
-                # self.browser = await camoufox.start()
-                self.context: BrowserContext = await launch_persistent_context(
-                    user_data_dir="./my_actor/clearcote/",
-                    fingerprint=f"{self.session_id}",
-                    platform=self.platform,
+                chromium_fish = AsyncChromiumfish(
+                    persona_seed=self.session_id,
                     headless=False,
-                    # disable_gpu_fingerprint=True,
                     proxy=self.proxy,
-                    geoip=self.geoip,
-                    quiet=True,
-                    humanize=True
+                    timezone="auto" if self.proxy_url else None
                 )
-                self.http_client = await self.context.new_page()
+                self.browser = await chromium_fish.start()
+                self.http_client = await self.browser.new_page()
                 await self.http_client.goto(cookie_url)          
                 await self.http_client.wait_for_selector('article[data-testid="plp-product-card"]', timeout=10000)
                 
@@ -273,7 +260,7 @@ class AdidasScraper:
                     self.proxy_url = await self.proxy_cfg.new_url(session_id=f"{self.session_id}")
                     self.rotate_proxy()
                 
-                await self.context.close()
+                await self.browser.close()
                 continue
             else:
                 new_build_id_obtained = True
@@ -288,7 +275,7 @@ class AdidasScraper:
             raise FatalAntiBotBlockError(f"COULD NOT ESTABLISH CONNECTION TO ADIDAS {country_text} AFTER 5 ATTEMPTS.")  # If the new build ID cannot be obtained, the scraper should crash here.
 
     async def close(self) -> None:
-        await self.context.close()
+        await self.browser.close()
     
     async def interact_naturally_with_page(self) -> None:
         while self.is_running:
@@ -317,7 +304,7 @@ class AdidasScraper:
         cookie_url = f"https://www.{REGIONS_DOMAINS[self.country]}/search?q="
 
         Actor.log.info("REFRESHING COOKIES...")
-        await self.context.close()
+        await self.browser.close()
         if self.proxy_cfg:
             while True:
                 self.session_id = f"{random.randint(0, 999999)}"
@@ -327,33 +314,14 @@ class AdidasScraper:
             self.rotate_proxy()
         for attempt in range(1, 6):
             try:
-                self.context: BrowserContext = await launch_persistent_context(
-                    user_data_dir="./my_actor/clearcote/",
-                    fingerprint=f"{self.session_id}",
-                    platform=self.platform,
+                chromium_fish = AsyncChromiumfish(
+                    persona_seed=self.session_id,
                     headless=False,
-                    # disable_gpu_fingerprint=True,
                     proxy=self.proxy,
-                    geoip=self.geoip,
-                    quiet=True,
-                    humanize=True
+                    timezone="auto" if self.proxy_url else None
                 )
-                # camoufox = AsyncCamoufox(
-                #     os="windows" if RUNNING_LOCALLY else "linux",
-                #     headless=True,
-                #     humanize=True,
-                #     fingerprint_preset=False,
-                #     proxy={
-                #         "server": "http://" + self.proxy_url.split("@")[-1],
-                #         "username": self.proxy_url.split("//")[-1].split(":")[0],
-                #         "password": self.proxy_url.split("//")[-1].split(":")[1].split("@")[0]
-                #     } if self.proxy_url else None,
-                #     geoip=True if self.proxy_url else False,
-                #     exclude_addons=[DefaultAddons.UBO]
-                # )
-                # self.browser = await camoufox.start()
-                # self.context = await self.browser.new_context()
-                self.http_client = await self.context.new_page()
+                self.browser = await chromium_fish.start()
+                self.http_client = await self.browser.new_page()
                 await self.http_client.goto(cookie_url)
                 await self.http_client.wait_for_selector('article[data-testid="plp-product-card"]', timeout=10000)
                 # await self.http_client.wait_for_timeout(2000)
